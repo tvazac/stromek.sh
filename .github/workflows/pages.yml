@@ -1,0 +1,85 @@
+name: Pages
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - LICENSE
+  pull_request:
+  workflow_dispatch:
+
+# Jen čtení repa; zápis do Pages a OIDC token potřebuje až job deploy.
+permissions:
+  contents: read
+
+# Nasazení nikdy neběží souběžně. Rozjeté nasazení se nepřeruší.
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Kontrola SVG (správně utvořené XML)
+        run: |
+          for f in *.svg; do
+            python3 -c 'import sys, xml.etree.ElementTree as ET; ET.parse(sys.argv[1])' "$f"
+            echo "OK $f"
+          done
+
+      - name: Kontrola syntaxe JavaScriptu v index.html
+        run: |
+          node -e '
+            const fs = require("fs");
+            const html = fs.readFileSync("index.html", "utf8");
+            const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]);
+            if (!scripts.length) { console.error("index.html neobsahuje žádný <script>"); process.exit(1); }
+            fs.writeFileSync(process.env.RUNNER_TEMP + "/app.js", scripts.join("\n;\n"));
+          '
+          node --check "$RUNNER_TEMP/app.js"
+          echo "OK index.html <script>"
+
+      - name: Kontrola lokálních odkazů
+        run: |
+          missing=0
+          for ref in $(grep -oE '(href|src)="[^"#:]+"' index.html | sed -E 's/^[a-z]+="(.*)"$/\1/' | sort -u); do
+            if [ -f "$ref" ]; then echo "OK $ref"; else echo "::error file=index.html::Chybí soubor $ref"; missing=1; fi
+          done
+          exit $missing
+
+      - name: Sestavení webu
+        run: |
+          mkdir -p _site
+          cp index.html *.svg _site/
+          ls -la _site
+
+      - name: Nastavení Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      - name: Nahrání artefaktu
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: _site
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Nasazení na GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

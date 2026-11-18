@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 72" width="330" height="72">
+  <title>stromek.sh</title>
+  <style>
+    .word { fill: #1f1f1c; }
+    .tag { fill: #6a6a63; }
+    @media (prefers-color-scheme: dark) {
+      .word { fill: #ecebe5; }
+      .tag { fill: #a4a39b; }
+    }
+    text { font-family: ui-monospace, "JetBrains Mono", "Cascadia Code", "DejaVu Sans Mono", Menlo, Consolas, monospace; }
+  </style>
+  <g transform="translate(2 2) scale(1.06)">
+    <g stroke="#6b4423" stroke-width="0.9" stroke-linejoin="round">
+      <polygon fill="#c98b47" points="11.79,54.6 52.21,54.6 50.24,51.2 13.76,51.2"/>
+      <polygon fill="#d9a05b" points="50.24,51.2 46.32,51.2 36.75,34.63 40.68,34.63"/>
+      <polygon fill="#d9a05b" points="13.76,51.2 17.68,51.2 27.25,34.63 23.32,34.63"/>
+      <polygon fill="#e4b26f" points="45.9,36.88 41.98,36.88 32.41,20.32 36.34,20.32"/>
+      <polygon fill="#e4b26f" points="18.1,36.88 22.02,36.88 31.59,20.32 27.66,20.32"/>
+      <polygon fill="#efc283" points="41.57,22.57 37.64,22.57 32,12.8 32,6"/>
+      <polygon fill="#efc283" points="22.43,22.57 26.36,22.57 32,12.8 32,6"/>
+    </g>
+    <rect fill="#3fb950" x="22.7" y="55.4" width="18.6" height="3.6" rx="0.6"/>
+  </g>
+  <text x="76" y="40" font-size="30" font-weight="700" letter-spacing="-0.5" class="word">stromek<tspan fill="#3fb950">.sh</tspan></text>
+  <text x="77" y="60" font-size="11.5" class="tag">kalkulačka stromku z latí</text>
+</svg>
